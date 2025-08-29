@@ -1,3 +1,6 @@
 spring:
   application:
     name: guruMate-main-backend
+
+  profiles:
+    active: local
