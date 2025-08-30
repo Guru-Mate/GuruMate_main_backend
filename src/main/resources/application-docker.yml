@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://db:5432/gurumate
+    username: gurumate
+    password: gurumate_pw
+server:
+  port: 8080
