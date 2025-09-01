@@ -5,62 +5,62 @@ description: "이 템플릿을 기반으로 JIRA 이슈가 생성됩니다."
 title: ""
 labels: []
 body:
-  - type: dropdown
-    id: issue_type
-    attributes:
-      label: "⚡️ 이슈 유형"
-      description: "JIRA에서 생성될 이슈 유형입니다."
-      options:
-        - Story
-        - Task
-        - Bug
-        - Chore
-        - Epic
-    validations:
-      required: true
+- type: dropdown
+  id: issue_type
+  attributes:
+    label: "⚡️ 이슈 유형"
+    description: "JIRA에서 생성될 이슈 유형입니다."
+    options:
+      - Story
+      - Task
+      - Bug
+      - Chore
+      - Epic
+  validations:
+    required: true
 
-  - type: input
-    id: epic_number
-    attributes:
-      label: "🎟️ 상위 에픽 Number"
-      description: "JIRA의 상위 이슈(에픽) 번호입니다. (선택 사항)"
-      placeholder: "GURUM-123"
-    validations:
-      required: false
+- type: input
+  id: epic_number
+  attributes:
+    label: "🎟️ 상위 에픽 Number"
+    description: "JIRA의 상위 이슈(에픽) 번호입니다. (선택 사항)"
+    placeholder: "GURUM-123"
+  validations:
+    required: false
 
-  - type: input
-    id: issue_label
-    attributes:
-      label: "🏷️ 레이블"
-      description: "JIRA 이슈 세부 사항에 기재될 레이블 목록입니다. (쉼표로 구분하여 여러 개 입력)"
-      placeholder: "backend, auth, new-feature"
-    validations:
-      required: false
+- type: input
+  id: issue_label
+  attributes:
+    label: "🏷️ 레이블"
+    description: "JIRA 이슈 세부 사항에 기재될 레이블 목록입니다. (쉼표로 구분하여 여러 개 입력)"
+    placeholder: "backend, auth, new-feature"
+  validations:
+    required: false
 
-  - type: input
-    id: branch_name
-    attributes:
-      label: "🌿 브랜치명"
-      description: "해당 이슈를 작업할 브랜치 이름입니다. 작성한 이름으로 develop에서 분기된 브랜치가 생성됩니다."
-      placeholder: "feat/user-login"
-    validations:
-      required: true
+- type: input
+  id: branch_name
+  attributes:
+    label: "🌿 브랜치명"
+    description: "해당 이슈를 작업할 브랜치 이름입니다. 작성한 이름으로 develop에서 분기된 브랜치가 생성됩니다."
+    placeholder: "feat/user-login"
+  validations:
+    required: true
 
-  - type: textarea
-    id: issue_description
-    attributes:
-      label: "📌 이슈 설명"
-      description: "간단한 이슈 설명입니다. JIRA 이슈 본문(설명)에 포함될 내용입니다."
-      placeholder: "사용자 로그인 시 필요한 인증 기능을 제공하여 보안과 사용자 세션을 관리합니다."
-    validations:
-      required: true
+- type: textarea
+  id: issue_description
+  attributes:
+    label: "📌 이슈 설명"
+    description: "간단한 이슈 설명입니다. JIRA 이슈 본문(설명)에 포함될 내용입니다."
+    placeholder: "사용자 로그인 시 필요한 인증 기능을 제공하여 보안과 사용자 세션을 관리합니다."
+  validations:
+    required: true
   
-  - type: textarea
-    id: task-list
-    attributes:
-      label: "✅ 작업 목록"
-      description: "해당 이슈를 해결하기 위한 세부 작업 목록을 Markdown 체크리스트로 작성해주세요."
-      value: |
-        - [ ] /api/login 엔드포인트 개발
-        - [ ] 이메일 및 비밀번호 데이터베이스 검증 로직 구현
-        - [ ] 성공 시 JWT 토큰 발급 및 반환
+- type: textarea
+  id: task-list
+  attributes:
+    label: "✅ 작업 목록"
+    description: "해당 이슈를 해결하기 위한 세부 작업 목록을 Markdown 체크리스트로 작성해주세요."
+    value: |
+      - [ ] /api/login 엔드포인트 개발
+      - [ ] 이메일 및 비밀번호 데이터베이스 검증 로직 구현
+      - [ ] 성공 시 JWT 토큰 발급 및 반환
