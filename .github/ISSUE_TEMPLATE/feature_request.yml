@@ -2,7 +2,7 @@
 
 name: "JIRA 연동 이슈 생성"
 description: "이 템플릿을 기반으로 JIRA 이슈가 생성됩니다."
-title: ""
+title: "이슈 생성"
 labels: []
 body:
 - type: dropdown
