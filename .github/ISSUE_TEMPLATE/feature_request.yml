@@ -3,6 +3,15 @@ description: 새로운 기능을 제안할 때 사용
 title: "[FEAT] "
 labels: ["enhancement"]
 body:
+  - type: input
+    id: jira-ticket
+    attributes:
+      label: 🎫 Jira Ticket
+      description: "이 기능 개발과 관련된 Jira 티켓 번호를 입력해주세요. 예: PROJ-123"
+      placeholder: "PROJ-123"
+    validations:
+      required: true
+
   - type: textarea
     id: background
     attributes:
