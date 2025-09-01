@@ -1,4 +1,4 @@
-# .github/ISSUE_TEMPLATE/jira_issue.yml
+# .github/ISSUE_TEMPLATE/feature_request.yml
 
 name: "JIRA 연동 이슈 생성"
 description: "이 템플릿을 기반으로 JIRA 이슈가 생성됩니다."
