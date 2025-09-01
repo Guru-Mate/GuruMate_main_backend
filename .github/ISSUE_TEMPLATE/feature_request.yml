@@ -1,22 +1,36 @@
-name: 🚀 Feature Request
-description: 새로운 기능을 제안할 때 사용
-title: "[FEAT] "
-labels: ["enhancement"]
+name: 🚀 Jira 연동 이슈
+description: Jira 티켓과 연동되는 새로운 이슈를 생성합니다.
+title: "[TYPE] " # 제목은 비워두거나 기본값을 설정합니다.
+labels: [] # 라벨은 종류에 따라 자동으로 할당되도록 비워둡니다.
 body:
   - type: input
     id: jira-ticket
     attributes:
       label: 🎫 Jira Ticket
-      description: "이 기능 개발과 관련된 Jira 티켓 번호를 입력해주세요. 예: PROJ-123"
+      description: "이 작업과 관련된 Jira 티켓 번호를 입력해주세요. 예: PROJ-123"
       placeholder: "PROJ-123"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: "📌 이슈 종류"
+      description: "이 이슈의 종류를 선택해주세요. 선택에 따라 제목 접두사와 라벨이 자동으로 설정됩니다."
+      options:
+        - "[FEAT] 기능 개발"
+        - "[BUG] 버그 수정"
+        - "[EPIC] 에픽"
+        - "[STORY] 스토리"
+        - "[TASK] 일반 작업"
     validations:
       required: true
 
   - type: textarea
     id: background
     attributes:
-      label: 💡 배경
-      description: 어떤 문제나 필요 때문에 이 기능이 필요한지 작성해주세요.
+      label: 💡 배경 및 목적
+      description: 어떤 문제나 필요 때문에 이 작업이 필요한지 작성해주세요.
       placeholder: 예) 사용자들이 DB 연결 상태를 확인하기 어렵습니다.
     validations:
       required: true
@@ -24,8 +38,8 @@ body:
   - type: textarea
     id: solution
     attributes:
-      label: ✨ 제안하는 해결책
-      description: 어떤 기능/구현 방식을 제안하는지 구체적으로 작성해주세요.
+      label: ✨ 주요 작업 내용
+      description: 어떤 작업을 할 것인지 구체적으로 작성해주세요.
       placeholder: 예) health check API를 추가해서 상태를 반환하도록 한다.
     validations:
       required: true
@@ -33,7 +47,7 @@ body:
   - type: textarea
     id: alternatives
     attributes:
-      label: 🔄 대안
-      description: 고려했던 다른 방법이 있다면 작성해주세요.
+      label: 🔄 참고 사항
+      description: 고려했던 다른 방법이나 참고할 링크가 있다면 작성해주세요.
     validations:
       required: false
