@@ -1,0 +1,43 @@
+name: GitHub Issue to Jira Sync from Form
+
+on:
+  issues:
+    types: [opened] # 이슈가 생성되었을 때만 실행
+
+jobs:
+  create_jira_issue:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. 이슈 본문에서 폼 입력값 추출하기
+      - name: Parse Issue Form Body
+        id: parse_form
+        run: |
+          body="${{ github.event.issue.body }}"
+          
+          # "### ⚡️ 이슈 유형" 섹션 아래의 값을 추출
+          issuetype=$(echo "$body" | grep -A 1 "### ⚡️ 이슈 유형" | tail -n 1)
+          echo "issuetype=$issuetype" >> $GITHUB_OUTPUT
+          
+          # "### 🎟️ 상위 에픽 Number" 섹션 아래의 값을 추출
+          epic_number=$(echo "$body" | grep -A 1 "### 🎟️ 상위 에픽 Number" | tail -n 1)
+          echo "epic_number=$epic_number" >> $GITHUB_OUTPUT
+          
+          # "### 🏷️ 레이블" 섹션 아래의 값을 추출
+          issue_label=$(echo "$body" | grep -A 1 "### 🏷️ 레이블" | tail -n 1)
+          echo "issue_label=$issue_label" >> $GITHUB_OUTPUT
+
+      # 2. 추출한 값으로 지라 이슈 생성하기
+      - name: Create Jira Issue
+        uses: atlassian/gajira-create@v3
+        with:
+          project: GURUMATE # 본인의 지라 프로젝트 키
+          issuetype: ${{ steps.parse_form.outputs.issuetype }} # 폼에서 선택한 이슈 유형
+          summary: ${{ github.event.issue.title }} # 깃허브 이슈 제목
+          description: ${{ github.event.issue.body }} # 폼 전체 내용을 지라 설명으로
+          epic: ${{ steps.parse_form.outputs.epic_number }} # 폼에서 입력한 상위 에픽
+          labels: ${{ steps.parse_form.outputs.issue_label }} # 폼에서 입력한 레이블
+
+          # 깃허브 레포지토리 Secrets에 미리 설정해야 합니다.
+          jira_base_url: ${{ secrets.JIRA_BASE_URL }}
+          jira_user_email: ${{ secrets.JIRA_USER_EMAIL }}
+          jira_api_token: ${{ secrets.JIRA_API_TOKEN }}
