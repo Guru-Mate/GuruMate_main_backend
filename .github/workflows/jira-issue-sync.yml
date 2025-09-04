@@ -23,7 +23,7 @@ jobs:
           echo "epic_number=$epic_number" >> $GITHUB_OUTPUT
           echo "issue_label=$issue_label" >> $GITHUB_OUTPUT
 
-      # 2. Jira 필드 JSON을 동적으로 생성 (가장 중요한 부분)
+     # 2. Jira 필드 JSON을 동적으로 생성 (수정됨)
       - name: Construct Jira Fields
         id: construct_fields
         run: |
