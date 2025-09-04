@@ -24,7 +24,7 @@ body:
   attributes:
     label: "🎟️ 상위 에픽 Number"
     description: "JIRA의 상위 이슈(에픽) 번호입니다. (선택 사항)"
-    placeholder: "GURUM-123"
+    placeholder: "SCRUM-123"
   validations:
     required: false
 
