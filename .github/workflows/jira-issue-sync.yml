@@ -8,34 +8,46 @@ jobs:
   create_jira_issue:
     runs-on: ubuntu-latest
     steps:
-    # 1. 이슈 본문에서 폼 입력값 추출하기 (수정됨)
+      # 1. 이슈 본문에서 폼 입력값 그대로 추출
       - name: Parse Issue Form Body
         id: parse_form
         run: |
           body="${{ github.event.issue.body }}"
-
-          # 함수: '_No response_'를 빈 문자열로 변환
-          parse_optional_field() {
-            local raw_value=$(echo "$body" | grep -A 2 "$1" | tail -n 1 | tr -d '\r')
-            if [ "$raw_value" == "_No response_" ]; then
-              echo ""
-            else
-              echo "$raw_value"
-            fi
-          }
-
-          # 필수 필드 추출
+          
+          # 각 항목의 실제 입력값을 추출
           issuetype=$(echo "$body" | grep -A 2 "### ⚡️ 이슈 유형" | tail -n 1 | tr -d '\r')
+          epic_number=$(echo "$body" | grep -A 2 "### 🎟️ 상위 에픽 Number" | tail -n 1 | tr -d '\r')
+          issue_label=$(echo "$body" | grep -A 2 "### 🏷️ 레이블" | tail -n 1 | tr -d '\r')
+
           echo "issuetype=$issuetype" >> $GITHUB_OUTPUT
-
-          # 선택적 필드 추출 (함수 사용)
-          epic_number=$(parse_optional_field "### 🎟️ 상위 에픽 Number")
           echo "epic_number=$epic_number" >> $GITHUB_OUTPUT
-
-          issue_label=$(parse_optional_field "### 🏷️ 레이블")
           echo "issue_label=$issue_label" >> $GITHUB_OUTPUT
 
-      # 2. Jira 로그인 단계 (새로 추가!)
+      # 2. Jira 필드 JSON을 동적으로 생성 (가장 중요한 부분)
+      - name: Construct Jira Fields
+        id: construct_fields
+        run: |
+          epic_key_raw="${{ steps.parse_form.outputs.epic_number }}"
+          labels_raw="${{ steps.parse_form.outputs.issue_label }}"
+
+          # 비어있는 JSON 객체로 시작
+          json_fields='{}'
+
+          # 사용자가 에픽 번호를 입력했을 때만 parent 필드를 JSON에 추가
+          if [[ -n "$epic_key_raw" && "$epic_key_raw" != "_No response_" ]]; then
+            json_fields=$(echo "$json_fields" | jq --arg key "$epic_key_raw" '.parent = {"key": $key}')
+          fi
+
+          # 사용자가 레이블을 입력했을 때만 labels 필드를 JSON에 추가
+          if [[ -n "$labels_raw" && "$labels_raw" != "_No response_" ]]; then
+            # 쉼표로 구분된 문자열을 JSON 배열 형식으로 변환
+            labels_json_array=$(echo "$labels_raw" | jq -R 'split(",") | map(. | ltrim | rtrim) | map(select(length > 0))')
+            json_fields=$(echo "$json_fields" | jq --argjson labels "$labels_json_array" '.labels = $labels')
+          fi
+
+          echo "json=$json_fields" >> $GITHUB_OUTPUT
+
+      # 3. Jira 로그인
       - name: Login to Jira
         uses: atlassian/gajira-login@v3
         env:
@@ -43,18 +55,12 @@ jobs:
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
-      # 3. Jira 이슈 생성 단계 (수정됨)
+      # 4. Jira 이슈 생성
       - name: Create Jira Issue
         uses: atlassian/gajira-create@v3
         with:
-          project: SCRUM # 지라 프로젝트 키
-          issuetype: ${{ steps.parse_form.outputs.issuetype }} # 폼에서 선택한 이슈 유형
-          summary: ${{ github.event.issue.title }} # 깃허브 이슈 제목
-          description: ${{ github.event.issue.body }} # 폼 전체 내용을 지라 설명으로
-          
-          # 👇 'epic', 'labels' 등을 'fields' 안에 JSON 형식으로 전달
-          fields: |
-            {
-              "parent": { "key": "${{ steps.parse_form.outputs.epic_number }}" },
-              "labels": ["${{ steps.parse_form.outputs.issue_label }}"]
-            }
+          project: SCRUM
+          issuetype: ${{ steps.parse_form.outputs.issuetype }}
+          summary: ${{ github.event.issue.title }}
+          description: ${{ github.event.issue.body }}
+          fields: ${{ steps.construct_fields.outputs.json }}
