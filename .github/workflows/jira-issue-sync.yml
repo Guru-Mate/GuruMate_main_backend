@@ -35,7 +35,7 @@ jobs:
       - name: Create Jira Issue
         uses: atlassian/gajira-create@v3
         with:
-          project: GURUMATE # 지라 프로젝트 키
+          project: SCRUM # 지라 프로젝트 키
           issuetype: ${{ steps.parse_form.outputs.issuetype }} # 폼에서 선택한 이슈 유형
           summary: ${{ github.event.issue.title }} # 깃허브 이슈 제목
           description: ${{ github.event.issue.body }} # 폼 전체 내용을 지라 설명으로
