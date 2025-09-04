@@ -30,23 +30,22 @@ jobs:
           epic_key_raw="${{ steps.parse_form.outputs.epic_number }}"
           labels_raw="${{ steps.parse_form.outputs.issue_label }}"
 
-          # 비어있는 JSON 객체로 시작
           json_fields='{}'
 
           # 사용자가 에픽 번호를 입력했을 때만 parent 필드를 JSON에 추가
           if [[ -n "$epic_key_raw" && "$epic_key_raw" != "_No response_" ]]; then
-            json_fields=$(echo "$json_fields" | jq --arg key "$epic_key_raw" '.parent = {"key": $key}')
+            # 👇 jq 명령어에 -c 옵션을 추가하여 결과를 한 줄로 만듭니다.
+            json_fields=$(echo "$json_fields" | jq -c --arg key "$epic_key_raw" '.parent = {"key": $key}')
           fi
 
           # 사용자가 레이블을 입력했을 때만 labels 필드를 JSON에 추가
           if [[ -n "$labels_raw" && "$labels_raw" != "_No response_" ]]; then
-            # 쉼표로 구분된 문자열을 JSON 배열 형식으로 변환
             labels_json_array=$(echo "$labels_raw" | jq -R 'split(",") | map(. | ltrim | rtrim) | map(select(length > 0))')
-            json_fields=$(echo "$json_fields" | jq --argjson labels "$labels_json_array" '.labels = $labels')
+            # 👇 jq 명령어에 -c 옵션을 추가하여 결과를 한 줄로 만듭니다.
+            json_fields=$(echo "$json_fields" | jq -c --argjson labels "$labels_json_array" '.labels = $labels')
           fi
 
           echo "json=$json_fields" >> $GITHUB_OUTPUT
-
       # 3. Jira 로그인
       - name: Login to Jira
         uses: atlassian/gajira-login@v3
