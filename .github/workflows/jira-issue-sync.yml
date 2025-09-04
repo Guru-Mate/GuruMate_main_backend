@@ -9,18 +9,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # 1. 이슈 본문에서 폼 입력값 추출하기 (이전과 동일)
+     # 1. 이슈 본문에서 폼 입력값 추출하기 (수정됨)
       - name: Parse Issue Form Body
         id: parse_form
         run: |
           body="${{ github.event.issue.body }}"
           
-          issuetype=$(echo "$body" | grep -A 1 "### ⚡️ 이슈 유형" | tail -n 1 | tr -d '\r')
+          # 👇 제목 아래 두 줄을 가져와서 마지막 줄을 값으로 선택하도록 수정
+          issuetype=$(echo "$body" | grep -A 2 "### ⚡️ 이슈 유형" | tail -n 1 | tr -d '\r')
           echo "issuetype=$issuetype" >> $GITHUB_OUTPUT
           
-          epic_number=$(echo "$body" | grep -A 1 "### 🎟️ 상위 에픽 Number" | tail -n 1 | tr -d '\r')
+          epic_number=$(echo "$body" | grep -A 2 "### 🎟️ 상위 에픽 Number" | tail -n 1 | tr -d '\r')
           echo "epic_number=$epic_number" >> $GITHUB_OUTPUT
           
-          issue_label=$(echo "$body" | grep -A 1 "### 🏷️ 레이블" | tail -n 1 | tr -d '\r')
+          issue_label=$(echo "$body" | grep -A 2 "### 🏷️ 레이블" | tail -n 1 | tr -d '\r')
           echo "issue_label=$issue_label" >> $GITHUB_OUTPUT
 
       # 2. Jira 로그인 단계 (새로 추가!)
