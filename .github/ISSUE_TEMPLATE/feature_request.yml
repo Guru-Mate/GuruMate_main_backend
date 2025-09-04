@@ -37,15 +37,6 @@ body:
   validations:
     required: false
 
-- type: input
-  id: branch_name
-  attributes:
-    label: "🌿 브랜치명"
-    description: "해당 이슈를 작업할 브랜치 이름입니다. 작성한 이름으로 develop에서 분기된 브랜치가 생성됩니다."
-    placeholder: "feat/user-login"
-  validations:
-    required: true
-
 - type: textarea
   id: issue_description
   attributes:
