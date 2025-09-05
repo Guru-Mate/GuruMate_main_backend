@@ -2,48 +2,48 @@ name: GitHub Issue Close to Jira Transition
 
 on:
   issues:
-    types: [closed] # 깃허브 이슈가 닫혔을 때 실행
+    types: [closed]
+
+# 이슈와 댓글을 읽기 위한 권한을 명시적으로 부여합니다.
+permissions:
+  issues: read
 
 jobs:
   transition_jira_issue:
     runs-on: ubuntu-latest
     steps:
-      # 1. 이슈 본문과 댓글에서 Jira 이슈 키(예: SCRUM-123) 찾기
+      # 1. 이슈의 '댓글'에서만 Jira 이슈 키를 찾도록 수정
       - name: Find Jira Issue Key
         id: find_key
         run: |
-          issue_body="${{ github.event.issue.body }}"
-          
           # 댓글 목록을 가져오는 API 호출
           comments_url="${{ github.event.issue.comments_url }}"
           comments=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" "$comments_url")
           
-          # 본문과 댓글을 합쳐서 Jira 키 검색
-          content_to_search="$issue_body $comments"
-          
           # 정규식을 사용해 'SCRUM-숫자' 형식의 키를 찾음
-          jira_key=$(echo "$content_to_search" | grep -oE 'SCRUM-[0-9]+' | head -n 1)
+          jira_key=$(echo "$comments" | grep -oE 'SCRUM-[0-9]+' | tail -n 1)
           
           if [[ -n "$jira_key" ]]; then
             echo "Jira Key Found: $jira_key"
             echo "key=$jira_key" >> $GITHUB_OUTPUT
           else
-            echo "Jira Key not found."
+            echo "Jira Key not found in comments."
           fi
 
       # 2. Jira 로그인
       - name: Login to Jira
-        if: steps.find_key.outputs.key # Jira 키를 찾았을 때만 실행
+        if: steps.find_key.outputs.key
         uses: atlassian/gajira-login@v3
         env:
           JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
 
-      # 3. Jira 이슈 상태를 '완료(Done)'로 변경
+      # 3. Jira 이슈 상태를 '개발 종료'로 변경
       - name: Transition Jira Issue
-        if: steps.find_key.outputs.key # Jira 키를 찾았을 때만 실행
+        if: steps.find_key.outputs.key
         uses: atlassian/gajira-transition@v3
         with:
           issue: ${{ steps.find_key.outputs.key }}
-          transition: "개발 종료" # 👈 중요: Jira 워크플로우의 '완료' 상태 이름
+          transition: "개발 종료"
+
