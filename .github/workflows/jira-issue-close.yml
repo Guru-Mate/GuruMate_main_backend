@@ -46,4 +46,4 @@ jobs:
         uses: atlassian/gajira-transition@v3
         with:
           issue: ${{ steps.find_key.outputs.key }}
-          transition: "개발종료" # 👈 중요: Jira 워크플로우의 '완료' 상태 이름
+          transition: "개발 종료" # 👈 중요: Jira 워크플로우의 '완료' 상태 이름
