@@ -1,0 +1,77 @@
+name: Deploy Main Backend to EC2
+
+# 👇 'develop' 브랜치에 코드가 푸시될 때마다 이 워크플로우를 실행하도록 변경합니다.
+on:
+  push:
+    branches: [ "develop" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    # develop 브랜치는 개발 환경에 배포되도록 설정합니다.
+    environment: development
+
+    steps:
+      # 1. 소스 코드 가져오기
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      # 2. JDK 21 설정
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      # 3. Gradle 빌드 권한 부여 및 실행
+      - name: Build with Gradle
+        run: |
+          chmod +x ./gradlew
+          ./gradlew build
+
+      # 4. Docker Hub 로그인
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 5. Docker 이미지 빌드 및 Docker Hub에 푸시
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          # 👇 이미지 태그를 'develop'으로 지정하여 운영(latest) 이미지와 구분합니다.
+          tags: tjdqls3607/gurumate-main-backend:develop
+
+      # 6. EC2에 접속하여 배포 스크립트 실행
+      - name: Deploy to EC2 instance
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            # 인프라 레포지토리 폴더로 이동합니다.
+            cd ~/GuruMate_infra
+
+            # 최신 배포 설정(docker-compose.yml 등)을 받아옵니다.
+            git pull
+
+            # GitHub Secrets를 사용하여 .env 파일을 동적으로 생성합니다.
+            # 이 파일은 docker-compose.yml이 참조하여 컨테이너에 환경변수를 주입합니다.
+            echo "SPRING_PROFILES_ACTIVE=dev" > .env
+            echo "SPRING_DATASOURCE_URL=jdbc:postgresql://${{ secrets.RDS_HOST }}:${{ secrets.RDS_PORT }}/${{ secrets.RDS_DB_NAME }}" >> .env
+            echo "SPRING_DATASOURCE_USERNAME=${{ secrets.RDS_USERNAME }}" >> .env
+            echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
+            
+            # ❗️ 애플리케이션에 필요한 다른 모든 비밀 값들도 여기에 추가해야 합니다. (예: JWT_SECRET)
+            # echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+
+            # 👇 Docker Hub에서 방금 푸시한 'develop' 태그의 이미지를 받아옵니다.
+            docker pull tjdqls3607/gurumate-main-backend:develop
+
+            # docker-compose로 백엔드 서비스만 재시작하여 무중단으로 업데이트합니다.
+            docker-compose up -d --no-deps main_backend
+
