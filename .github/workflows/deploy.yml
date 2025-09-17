@@ -1,14 +1,14 @@
 name: Deploy Main Backend to EC2
 
-# 👇 'develop' 브랜치에 코드가 푸시될 때마다 이 워크플로우를 실행하도록 변경합니다.
+# 👇 'dev' 브랜치에 코드가 푸시될 때마다 이 워크플로우를 실행하도록 수정합니다.
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "dev" ]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    # develop 브랜치는 개발 환경에 배포되도록 설정합니다.
+    # dev 브랜치는 개발 환경에 배포되도록 설정합니다.
     environment: development
 
     steps:
@@ -33,7 +33,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKOCKERHUB_USERNAME }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       # 5. Docker 이미지 빌드 및 Docker Hub에 푸시
@@ -42,8 +42,8 @@ jobs:
         with:
           context: .
           push: true
-          # 👇 이미지 태그를 'develop'으로 지정하여 운영(latest) 이미지와 구분합니다.
-          tags: tjdqls3607/gurumate-main-backend:develop
+          # 👇 이미지 태그를 'dev'로 지정하여 운영 이미지와 구분합니다.
+          tags: tjdqls3607/gurumate-main-backend:dev
 
       # 6. EC2에 접속하여 배포 스크립트 실행
       - name: Deploy to EC2 instance
@@ -60,7 +60,6 @@ jobs:
             git pull
 
             # GitHub Secrets를 사용하여 .env 파일을 동적으로 생성합니다.
-            # 이 파일은 docker-compose.yml이 참조하여 컨테이너에 환경변수를 주입합니다.
             echo "SPRING_PROFILES_ACTIVE=dev" > .env
             echo "SPRING_DATASOURCE_URL=jdbc:postgresql://${{ secrets.RDS_HOST }}:${{ secrets.RDS_PORT }}/${{ secrets.RDS_DB_NAME }}" >> .env
             echo "SPRING_DATASOURCE_USERNAME=${{ secrets.RDS_USERNAME }}" >> .env
@@ -69,8 +68,8 @@ jobs:
             # ❗️ 애플리케이션에 필요한 다른 모든 비밀 값들도 여기에 추가해야 합니다. (예: JWT_SECRET)
             # echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
 
-            # 👇 Docker Hub에서 방금 푸시한 'develop' 태그의 이미지를 받아옵니다.
-            docker pull tjdqls3607/gurumate-main-backend:develop
+            # 👇 Docker Hub에서 방금 푸시한 'dev' 태그의 이미지를 받아옵니다.
+            docker pull tjdqls3607/gurumate-main-backend:dev
 
             # docker-compose로 백엔드 서비스만 재시작하여 무중단으로 업데이트합니다.
             docker-compose up -d --no-deps main_backend
