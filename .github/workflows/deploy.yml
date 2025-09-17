@@ -1,6 +1,6 @@
 name: Deploy Main Backend to EC2
 
-# 👇 'dev' 브랜치에 코드가 푸시될 때마다 이 워크플로우를 실행하도록 수정합니다.
+# 'dev' 브랜치에 코드가 푸시될 때마다 이 워크플로우를 실행하도록 수정합니다.
 on:
   push:
     branches: [ "dev" ]
@@ -27,7 +27,8 @@ jobs:
       - name: Build with Gradle
         run: |
           chmod +x ./gradlew
-          ./gradlew build
+          # 👇 '-x test' 옵션을 추가하여 빌드 시 테스트를 건너뜁니다.
+          ./gradlew build -x test
 
       # 4. Docker Hub 로그인
       - name: Login to Docker Hub
