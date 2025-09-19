@@ -6,7 +6,7 @@ on:
     branches: [ "dev" ]
 
 permissions:
-  id-token: write # OIDC를 위해 ID 토큰을 발급받을 권한
+  id-token: write   # OIDC 토큰 발급
   contents: read
 
 jobs:
@@ -42,22 +42,27 @@ jobs:
           push: true
           tags: tjdqls3607/gurumate-main-backend:dev
 
+      # 🔑 OIDC 인증 (IAM Role assume)
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::596846156738:role/github-actions-ssm-role
           aws-region: ap-northeast-2
 
-      - name: AWS SSM Send-Command
-        uses: peterkimzz/aws-ssm-send-command@v1.1.1
-        with:
-          instance-ids: ${{ secrets.EC2_INSTANCE_ID }}
-          command: |
-            cd /home/ubuntu/GuruMate_infra
-            git pull
-            echo "SPRING_PROFILES_ACTIVE=dev" > .env
-            echo "SPRING_DATASOURCE_URL=jdbc:postgresql://${{ secrets.RDS_HOST }}:${{ secrets.RDS_PORT }}/${{ secrets.RDS_DB_NAME }}" >> .env
-            echo "SPRING_DATASOURCE_USERNAME=${{ secrets.RDS_USERNAME }}" >> .env
-            echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
-            docker pull tjdqls3607/gurumate-main-backend:dev
-            docker-compose up -d --no-deps main_backend
+      # 🚀 SSM 명령 전송 (CLI 사용)
+      - name: Deploy to EC2 via SSM
+        run: |
+          aws ssm send-command \
+            --targets "Key=instanceIds,Values=${{ secrets.EC2_INSTANCE_ID }}" \
+            --document-name "AWS-RunShellScript" \
+            --comment "Deploy GuruMate backend" \
+            --parameters 'commands=[
+              "cd /home/ubuntu/GuruMate_infra",
+              "git pull",
+              "echo SPRING_PROFILES_ACTIVE=dev > .env",
+              "echo SPRING_DATASOURCE_URL=jdbc:postgresql://${{ secrets.RDS_HOST }}:${{ secrets.RDS_PORT }}/${{ secrets.RDS_DB_NAME }} >> .env",
+              "echo SPRING_DATASOURCE_USERNAME=${{ secrets.RDS_USERNAME }} >> .env",
+              "echo SPRING_DATASOURCE_PASSWORD=${{ secrets.RDS_PASSWORD }} >> .env",
+              "docker pull tjdqls3607/gurumate-main-backend:dev",
+              "docker-compose up -d --no-deps main_backend"
+            ]'
