@@ -63,4 +63,4 @@ jobs:
             echo "SPRING_DATASOURCE_USERNAME=${{ secrets.RDS_USERNAME }}" >> .env
             echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
             docker pull tjdqls3607/gurumate-main-backend:dev
-            docker-compose up -d --no-deps main_backend
+            docker-compose up -d --no-deps GuruMate_main_backend
