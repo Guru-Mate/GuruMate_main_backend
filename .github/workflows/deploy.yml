@@ -22,7 +22,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           # 2단계에서 복사해 둔 역할(Role)의 ARN을 넣습니다.
-          role-to-assume: arn:aws:iam::YOUR_AWS_ACCOUNT_ID:role/github-actions-ssm-role
+          role-to-assume: arn:aws:iam::596846156738:role/github-actions-ssm-role
           aws-region: ap-northeast-2
 
       # 7. SSM Run Command를 사용하여 EC2에 배포 스크립트 실행
