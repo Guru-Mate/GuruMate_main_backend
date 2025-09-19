@@ -14,7 +14,7 @@ jobs:
     environment: development
 
     steps:
-      # ... (1~5단계: 체크아웃, JDK 설정, Gradle 빌드, Docker Hub 로그인, 이미지 빌드/푸시) ...
+      # 1~5단계: 소스코드 체크아웃, JDK 설정, Gradle 빌드, Docker Hub 로그인, 이미지 빌드/푸시
       - name: Checkout source code
         uses: actions/checkout@v3
 
@@ -40,21 +40,21 @@ jobs:
         with:
           context: .
           push: true
-          tags: tjdqls3607/gurumate_main_backend:dev
+          tags: tjdqls3607/gurumate-main-backend:dev
 
       # 6. AWS 자격 증명 설정 (OIDC 사용)
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           # 2단계에서 복사해 둔 역할(Role)의 ARN을 넣습니다.
-          role-to-assume: arn:aws:iam::596846156738:role/github-actions-ssm-role # YOUR_AWS_ACCOUNT_ID를 실제 ID로 변경
+          role-to-assume: arn:aws:iam::596846156738:role/github-actions-ssm-role
           aws-region: ap-northeast-2
 
       # 7. SSM Run Command를 사용하여 EC2에 배포 스크립트 실행
       - name: Deploy to EC2 via SSM
-        uses: aws-actions/amazon-ssm-send-command@v1
+        uses: aws-actions/amazon-ssm-send-command@v1.0.0 # 버전을 명시적으로 지정
         with:
-          instance-ids: ${{ secrets.EC2_INSTANCE_ID }} # EC2 인스턴스 ID (예: i-012345abcdef)
+          instance-ids: ${{ secrets.EC2_INSTANCE_ID }}
           command: |
             cd /home/ubuntu/GuruMate_infra
             git pull
@@ -63,4 +63,4 @@ jobs:
             echo "SPRING_DATASOURCE_USERNAME=${{ secrets.RDS_USERNAME }}" >> .env
             echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.RDS_PASSWORD }}" >> .env
             docker pull tjdqls3607/gurumate-main-backend:dev
-            docker-compose up -d --no-deps GuruMate_main_backend
+            docker-compose up -d --no-deps main_backend
