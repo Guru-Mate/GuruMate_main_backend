@@ -1,0 +1,15 @@
+name: Debug Action Resolver
+
+on:
+  # 이 워크플로우는 수동으로만 실행됩니다.
+  workflow_dispatch:
+
+jobs:
+  test-external-action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Step 1 - Use a very common official action
+        uses: actions/checkout@v4 # AWS 액션이 아닌, 가장 흔한 공식 액션을 사용해 봅니다.
+
+      - name: Step 2 - If checkout works, the resolver is fine
+        run: echo "Successfully resolved and used actions/checkout@v4."
