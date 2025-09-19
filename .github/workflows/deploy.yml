@@ -48,8 +48,8 @@ jobs:
           role-to-assume: arn:aws:iam::596846156738:role/github-actions-ssm-role
           aws-region: ap-northeast-2
 
-      - name: Deploy to EC2 via SSM
-        uses: aws-actions/amazon-ssm-send-command@v1
+      - name: AWS SSM Send-Command
+        uses: peterkimzz/aws-ssm-send-command@v1.1.1
         with:
           instance-ids: ${{ secrets.EC2_INSTANCE_ID }}
           command: |
