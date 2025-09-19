@@ -27,7 +27,7 @@ jobs:
 
       # 7. SSM Run Command를 사용하여 EC2에 배포 스크립트 실행
       - name: Deploy to EC2 via SSM
-        uses: aws-actions/aws-ssm-send-command@v1
+        uses: aws-actions/amazon-ssm-send-command@v1
         with:
           instance-ids: ${{ secrets.EC2_INSTANCE_ID }} # EC2 인스턴스 ID (예: i-012345abcdef)
           command: |
